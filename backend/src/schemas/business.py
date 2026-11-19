@@ -29,3 +29,27 @@ class CandidateInput(BaseModel):
 class ExperimentInput(BaseModel):
  name:str=Field(min_length=2,max_length=120)
  candidate_id:int
+class TelemetryWrite(BaseModel):
+ recorded_at:str
+ sensor_id:int=Field(ge=1,le=1000)
+ device_type:str
+ value:float
+ @model_validator(mode='after')
+ def valid_record(self):
+  a=datetime.fromisoformat(self.recorded_at)
+  if self.device_type not in ('pump','motor','valve'):raise ValueError('设备类型无效')
+  self.recorded_at=a.isoformat(timespec='seconds')
+  return self
+class PageBegin(BaseModel):
+ page_size:int=Field(ge=1,le=500)
+ start_at:str|None=None
+ end_at:str|None=None
+ @model_validator(mode='after')
+ def valid_range(self):
+  for k in ('start_at','end_at'):
+   v=getattr(self,k)
+   if v is not None:setattr(self,k,datetime.fromisoformat(v).isoformat(timespec='seconds'))
+  if self.start_at and self.end_at and self.start_at>self.end_at:raise ValueError('结束时间必须晚于开始时间')
+  return self
+class PageNext(BaseModel):
+ cursor:str=Field(min_length=16,max_length=2000)

@@ -6,6 +6,7 @@ x-app: &app
     REDIS_URL: redis://redis:6379/0
     JWT_SECRET: ${JWT_SECRET:-index-trial-local-demo-secret-change-before-use}
     SEED_DEMO: ${SEED_DEMO:-true}
+    PAGE_CURSOR_TTL: ${PAGE_CURSOR_TTL:-600}
   volumes:
     - artifacts:/artifacts
   depends_on:
